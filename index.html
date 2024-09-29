@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>EgoAllo</title>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <style>
+      body,
+      html {
+        width: 100%;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        background: #000;
+      }
+      #nav-links {
+        padding: 1em;
+        display: flex;
+        gap: 2em;
+        justify-content: center;
+      }
+      #iframe-container {
+        width: 100%;
+        flex-grow: 1;
+      }
+      iframe {
+        background-color: #000;
+        width: 100%;
+        height: 100%;
+        border: none;
+        box-shadow: 0 0 1em 0em rgba(0, 0, 0, 0.15);
+      }
+      @media (max-width: 768px) {
+        iframe {
+          width: 100%;
+          height: 30em;
+        }
+      }
+      a,
+      a:link {
+        color: #fff;
+        text-decoration: none;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+      }
+      a[data-selected="true"] {
+        opacity: 1;
+      }
+      a:hover {
+        opacity: 0.8;
+      }
+    </style>
+    <title>EgoAllo</title>
+  </head>
+  <body>
+    <div id="nav-links"></div>
+    <div id="iframe-container"></div>
+    <script>
+      const iframeSources = {
+        ["Coffee Machine"]:
+          "https://brentyi.github.io/egoallo/viser-embed/?playbackPath=https://brentyi.github.io/egoallo/sequences/jog.viser&initialCameraPosition=0.98,8.4,0.58&initialCameraLookAt=-1.15,6.68,-0.52",
+        ["Jog"]:
+          "https://brentyi.github.io/egoallo/viser-embed/?playbackPath=https://brentyi.github.io/egoallo/sequences/coffeemachine.viser&initialCameraPosition=-0.22,0.86,0.4&initialCameraLookAt=-0.57,-0.93,-0.46",
+        ["Dance (EgoExo)"]:
+          "https://brentyi.github.io/egoalgo-results/build/?playbackPath=https://brentyi.github.io/egoalgo-results/july17/egoexo_0.viser&darkMode",
+        ["Basketball (EgoExo)"]:
+          "https://brentyi.github.io/egoalgo-results/build/?playbackPath=https://brentyi.github.io/egoalgo-results/july17/egoexo_4.viser&darkMode",
+      };
+
+      const navLinks = document.getElementById("nav-links");
+      const iframeContainer = document.getElementById("iframe-container");
+
+      function createIframe(src) {
+        const iframe = document.createElement("iframe");
+        iframe.src = src;
+        return iframe;
+      }
+
+      function showIframe(src) {
+        iframeContainer.innerHTML = "";
+        iframeContainer.appendChild(createIframe(src));
+      }
+
+      Object.entries(iframeSources).forEach(([label, src], index) => {
+        const link = document.createElement("a");
+        link.href = "#";
+        link.textContent = label;
+        link.setAttribute("data-selected", index === 0 ? "true" : "false");
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          document
+            .querySelectorAll("#nav-links a")
+            .forEach((a) => a.setAttribute("data-selected", "false"));
+          link.setAttribute("data-selected", "true");
+          showIframe(src);
+        });
+        navLinks.appendChild(link);
+      });
+
+      // Show the first iframe by default
+      showIframe(Object.values(iframeSources)[0]);
+    </script>
+  </body>
+</html>
