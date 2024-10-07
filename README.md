@@ -15,6 +15,13 @@ Code release for our preprint:
 
 ---
 
+**TLDR;** We use egocentric SLAM poses and images to estimate 3D human body pose, height, and hands.
+
+https://github.com/user-attachments/assets/7d28e07f-ab83-4749-ac6b-abe692d9ba20
+
+
+---
+
 **Updates**
 
 - _Oct 7, 2024:_ Initial release.
@@ -24,11 +31,12 @@ Code release for our preprint:
 This repository currently contains:
 
 - [x] `egoallo` package, which contains reference training and sampling implementation details.
-- [x] Runnable training script.
+- [x] Training script.
 
 We are preparing and will release by October 14:
 
 - [ ] Setup instructions.
-- [ ] Preprocessed training data.
+- [ ] Model checkpoints.
+- [ ] Dataset preprocessing script.
 - [ ] Inference script.
 - [ ] Visualization script.
