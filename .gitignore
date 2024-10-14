@@ -15,3 +15,6 @@ htmlcov
 .envrc
 lightning_logs/
 outputs/
+
+data/
+egoallo_checkpoint_*

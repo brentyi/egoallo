@@ -155,7 +155,7 @@ class JaxGuidanceParams:
     skate_weight: float = 30.0
 
     # Note: this should be quite high. If the hand quaternions aren't
-    # constrained enough the reprojecction loss can get a bit wild.
+    # constrained enough the reprojecction loss can get wild.
     hand_quats: jdc.Static[bool] = True
     hand_quat_weight = 5.0
 
@@ -191,7 +191,7 @@ class JaxGuidanceParams:
                     hamer_reproj=False,
                     hamer_wrist_pose=False,
                     aria_wrists=False,
-                    max_iters=3,
+                    max_iters=5,
                 ),
                 "post": JaxGuidanceParams(
                     hand_quats=False,
@@ -210,7 +210,7 @@ class JaxGuidanceParams:
                     hamer_reproj=False,
                     hamer_wrist_pose=False,
                     aria_wrists=True,
-                    max_iters=3,
+                    max_iters=5,
                 ),
                 "post": JaxGuidanceParams(
                     hand_quats=False,
@@ -229,7 +229,7 @@ class JaxGuidanceParams:
                     hamer_reproj=False,
                     hamer_wrist_pose=False,
                     aria_wrists=True,
-                    max_iters=3,
+                    max_iters=5,
                 ),
                 "post": JaxGuidanceParams(
                     hand_quats=True,
@@ -249,7 +249,7 @@ class JaxGuidanceParams:
                     hamer_reproj=False,
                     hamer_wrist_pose=True,
                     aria_wrists=False,
-                    max_iters=3,
+                    max_iters=5,
                 ),
                 "post": JaxGuidanceParams(
                     hand_quats=True,
@@ -270,7 +270,7 @@ class JaxGuidanceParams:
                     hamer_reproj=False,
                     hamer_wrist_pose=True,
                     aria_wrists=False,
-                    max_iters=3,
+                    max_iters=5,
                 ),
                 "post": JaxGuidanceParams(
                     hand_quats=True,
@@ -854,6 +854,7 @@ def _optimize(
                 ),
             ]
         ),
+        linear_solver="conjugate_gradient",
         trust_region=jaxls.TrustRegionConfig(
             lambda_initial=guidance_params.lambda_initial
         ),
