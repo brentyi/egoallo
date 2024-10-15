@@ -10,7 +10,7 @@ from torch import Tensor
 from tqdm.auto import tqdm
 
 from . import fncsmpl, network
-from .constraint_optimizers_jax import (
+from .guidance_optimizer_jax import (
     GuidanceMode,
     JaxGuidanceParams,
     do_guidance_optimization,

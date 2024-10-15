@@ -20,7 +20,7 @@ from egoallo.data.dataclass import collate_dataclass
 
 
 @dataclasses.dataclass(frozen=True)
-class EgoTrainConfig:
+class EgoAlloTrainConfig:
     experiment_name: str
     dataset_hdf5_path: Path
     dataset_files_path: Path
@@ -66,7 +66,8 @@ def get_experiment_dir(experiment_name: str, version: int = 0) -> Path:
 
 
 def run_training(
-    config: EgoTrainConfig, restore_checkpoint_dir: Path | None = None
+    config: EgoAlloTrainConfig,
+    restore_checkpoint_dir: Path | None = None,
 ) -> None:
     # Set up experiment directory + HF accelerate.
     # We're getting to manage logging, checkpoint directories, etc manually,

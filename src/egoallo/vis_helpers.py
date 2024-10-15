@@ -1,4 +1,3 @@
-import io
 import time
 from pathlib import Path
 from typing import Callable, TypedDict
@@ -139,9 +138,8 @@ def visualize_traj_and_hand_detections(
     points_data: np.ndarray | None = None,
     splat_path: Path | None = None,
     floor_z: float = 0.0,
-    lhand_annotation_points: dict[int, np.ndarray] | None = None,
-    rhand_annotation_points: dict[int, np.ndarray] | None = None,
     show_joints: bool = False,
+    get_ego_video: Callable[[int, int, float], bytes] | None = None,
 ) -> Callable[[], int]:
     """Chaotic mega-function for visualization. Returns a callback that should
     be called repeatedly in a loop."""
@@ -167,7 +165,7 @@ def visualize_traj_and_hand_detections(
             point_shape="sparkle",
         )
         size_slider = server.gui.add_slider(
-            "Point cloud size", min=0.001, max=0.02, step=0.001, initial_value=0.005
+            "Point cloud size", min=0.001, max=0.05, step=0.001, initial_value=0.005
         )
 
         @size_slider.on_update
@@ -343,27 +341,6 @@ def visualize_traj_and_hand_detections(
                         )
                     )
 
-    # Visualize left and right hand annotation points
-    if lhand_annotation_points is not None:
-        for t, points in lhand_annotation_points.items():
-            server.scene.add_point_cloud(
-                f"/timesteps/{t}/lhand_annotationt",
-                points=points,
-                colors=(255, 127, 0),
-                point_size=0.005,
-                point_shape="diamond",
-            )
-
-    if rhand_annotation_points is not None:
-        for t, points in rhand_annotation_points.items():
-            server.scene.add_point_cloud(
-                f"/timesteps/{t}/lhand_annotationt",
-                points=points,
-                colors=(0, 127, 255),
-                point_size=0.005,
-                point_shape="diamond",
-            )
-
     body_handles = (
         [
             server.scene.add_mesh_skinned(
@@ -393,9 +370,9 @@ def visualize_traj_and_hand_detections(
     )
 
     gui_attach = server.gui.add_checkbox("Attach camera to CPF", initial_value=False)
-    gui_attach_dist = server.gui.add_number("Attach distance", initial_value=-0.3)
+    gui_attach_dist = server.gui.add_number("Attach distance", initial_value=0.3)
     gui_show_body = server.gui.add_checkbox("Show body", initial_value=True)
-    gui_show_cpf_frame = server.gui.add_checkbox("Show CPF frame", initial_value=True)
+    gui_show_glasses = server.gui.add_checkbox("Show glasses", initial_value=True)
     gui_show_cpf_axes = server.gui.add_checkbox("Show CPF axes", initial_value=False)
     gui_wireframe = server.gui.add_checkbox("Wireframe", initial_value=False)
     gui_smpl_opacity = server.gui.add_slider(
@@ -437,9 +414,10 @@ def visualize_traj_and_hand_detections(
         for handle in body_handles:
             handle.visible = gui_show_body.value
 
-    @gui_show_cpf_frame.on_update
+    @gui_show_glasses.on_update
     def _(_) -> None:
-        cpf_handle.visible = gui_show_cpf_frame.value
+        # The glasses are a child of the CPF frame.
+        cpf_handle.visible = gui_show_glasses.value
 
     @gui_show_cpf_axes.on_update
     def _(_) -> None:
@@ -546,39 +524,22 @@ def visualize_traj_and_hand_detections(
 
     get_viser_file = server.gui.add_button("Get .viser file")
 
-    npz_file = server.gui.add_button("Get Hongsuk NPZ file")
+    if get_ego_video is not None:
+        ego_video = server.gui.add_button("Get Ego Video")
 
-    @npz_file.on_click
-    def _(event: viser.GuiEvent) -> None:
-        assert event.client is not None
-
-        print("Running LBS...")
-        assert fk_outputs is not None
-        mesh = fk_outputs.lbs()
-        print("Creating outputs...")
-
-        things_for_hongsuk = {
-            "verts": mesh.verts[0].numpy(force=True),
-            "faces": mesh.faces.numpy(force=True),
-            "T_world_root": fk_outputs.T_world_root[0].numpy(force=True),
-            "Ts_world_joint": fk_outputs.Ts_world_joint[0].numpy(force=True),
-            "joint_positions": np.concatenate(
-                [
-                    fk_outputs.T_world_root[0, :, None, 4:7].numpy(force=True),
-                    fk_outputs.Ts_world_joint[0, ..., 4:7].numpy(force=True),
-                ],
-                axis=-2,
-            ),
-        }
-
-        # Save to NPZ format in memory
-        buffer = io.BytesIO()
-        np.savez(buffer, **things_for_hongsuk)
-        buffer.seek(0)
-        npz_bytes = buffer.getvalue()
-
-        # Send the NPZ file as a download
-        event.client.send_file_download("hongsuk_data.npz", npz_bytes)
+        @ego_video.on_click
+        def _(event: viser.GuiEvent) -> None:
+            assert event.client is not None
+            notif = event.client.add_notification(
+                "Getting video...", body="", loading=True, with_close_button=False
+            )
+            ego_video_bytes = get_ego_video(
+                gui_start_end.value[0],
+                gui_start_end.value[1],
+                (gui_start_end.value[1] - gui_start_end.value[0]) / gui_framerate.value,
+            )
+            notif.remove()
+            event.client.send_file_download("ego_video.mp4", ego_video_bytes)
 
     prev_time = time.time()
 
