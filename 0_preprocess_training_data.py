@@ -15,13 +15,13 @@ from egoallo.data.amass import EgoTrainingData
 
 
 def main(
-    smplh_path: Path = Path("./data/smplh/neutral/model.npz"),
+    smplh_npz_path: Path = Path("./data/smplh/neutral/model.npz"),
     data_npz_dir: Path = Path("./data/processed_30fps_no_skating/"),
     output_file: Path = Path("./data/egoalgo_no_skating_dataset.hdf5"),
     output_list_file: Path = Path("./data/egoalgo_no_skating_dataset_files.txt"),
     include_hands: bool = True,
 ) -> None:
-    body_model = fncsmpl.SmplhModel.load(smplh_path)
+    body_model = fncsmpl.SmplhModel.load(smplh_npz_path)
 
     assert torch.cuda.is_available()
 
