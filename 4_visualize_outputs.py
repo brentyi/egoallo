@@ -31,18 +31,18 @@ from egoallo.vis_helpers import visualize_traj_and_hand_detections
 
 def main(
     search_root_dir: Path,
-    body_npz_path: Path = Path("./data/smplh/neutral/model.npz"),
+    smplh_npz_path: Path = Path("./data/smplh/neutral/model.npz"),
 ) -> None:
     """Visualization script for outputs from EgoAllo.
 
     Arguments:
         search_root_dir: Root directory where inputs/outputs are stored. All
             NPZ files in this directory will be assumed to be outputs from EgoAllo.
-        body_npz_path: Path to the SMPLH model NPZ file.
+        smplh_npz_path: Path to the SMPLH model NPZ file.
     """
     device = torch.device("cuda")
 
-    body_model = fncsmpl.SmplhModel.load(body_npz_path).to(device)
+    body_model = fncsmpl.SmplhModel.load(smplh_npz_path).to(device)
 
     server = viser.ViserServer()
     server.gui.configure_theme(dark_mode=True)

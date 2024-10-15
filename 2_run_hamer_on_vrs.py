@@ -24,12 +24,12 @@ from egoallo.inference_utils import InferenceTrajectoryPaths
 
 
 def main(traj_root: Path, overwrite: bool = False) -> None:
-    """Run HaMeR for on trajectory.
-
+    """Run HaMeR for on trajectory. We'll save outputs to
+    `traj_root/hamer_outputs.pkl` and `traj_root/hamer_outputs_render".
 
     Arguments:
-        traj_root: The root directory of the trajectory. We assume that there
-            is one VRS file in this directory.
+        traj_root: The root directory of the trajectory. We assume that there's
+            a VRS file in this directory.
         overwrite: If True, overwrite any existing HaMeR outputs.
     """
 

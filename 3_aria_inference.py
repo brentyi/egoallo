@@ -28,9 +28,18 @@ from egoallo.vis_helpers import visualize_traj_and_hand_detections
 
 @dataclasses.dataclass
 class Args:
-    traj_dir: Path
+    traj_root: Path
+    """Search directory for trajectories. This should generally be laid out as something like:
+
+    traj_dir/
+        video.vrs
+        egoallo_outputs/
+            {date}_{start_index}-{end_index}.npz
+            ...
+        ...
+    """
     checkpoint_dir: Path = Path("./egoallo_checkpoint_april13/checkpoints_3000000/")
-    body_npz_path: Path = Path("./data/smplh/neutral/model.npz")
+    smplh_npz_path: Path = Path("./data/smplh/neutral/model.npz")
 
     glasses_x_angle_offset: float = 0.0
     """Rotate the CPF poses by some X angle."""
@@ -57,7 +66,7 @@ class Args:
 def main(args: Args) -> None:
     device = torch.device("cuda")
 
-    traj_paths = InferenceTrajectoryPaths.find(args.traj_dir)
+    traj_paths = InferenceTrajectoryPaths.find(args.traj_root)
     if traj_paths.splat_path is not None:
         print("Found splat at", traj_paths.splat_path)
     else:
@@ -120,7 +129,7 @@ def main(args: Args) -> None:
         server.gui.configure_theme(dark_mode=True)
 
     denoiser_network = load_denoiser(args.checkpoint_dir).to(device)
-    body_model = fncsmpl.SmplhModel.load(args.body_npz_path).to(device)
+    body_model = fncsmpl.SmplhModel.load(args.smplh_npz_path).to(device)
 
     traj = run_sampling_with_stitching(
         denoiser_network,
@@ -142,10 +151,10 @@ def main(args: Args) -> None:
             time.strftime("%Y%m%d-%H%M%S")
             + f"_{args.start_index}-{args.start_index + args.traj_length}"
         )
-        out_path = args.traj_dir / "egoallo_outputs" / (save_name + ".npz")
+        out_path = args.traj_root / "egoallo_outputs" / (save_name + ".npz")
         out_path.parent.mkdir(parents=True, exist_ok=True)
         assert not out_path.exists()
-        (args.traj_dir / "egoallo_outputs" / (save_name + "_args.yaml")).write_text(
+        (args.traj_root / "egoallo_outputs" / (save_name + "_args.yaml")).write_text(
             yaml.dump(dataclasses.asdict(args))
         )
 
