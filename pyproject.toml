@@ -14,7 +14,22 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent"
 ]
-dependencies = ["torch>2.2", "viser", "typeguard", "jaxtyping", "einops", "rotary-embedding-torch", "h5py", "tensorboard", "projectaria_tools", "accelerate", "accelerate", "tensorboardX", "loguru", "projectaria-tools[all]"]
+dependencies = [
+    "torch>2.2",
+    "viser",
+    "typeguard",
+    "jaxtyping",
+    "einops",
+    "rotary-embedding-torch",
+    "h5py",
+    "tensorboard",
+    "projectaria_tools",
+    "accelerate",
+    "tensorboardX",
+    "loguru",
+    "projectaria-tools[all]",
+    "opencv-python"
+]
 
 [tool.setuptools.package-data]
 egoallo = ["py.typed"]

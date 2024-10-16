@@ -8,7 +8,7 @@ import cv2
 import imageio.v3 as iio
 import numpy as np
 import tyro
-from egoalgo.hand_detection_structs import (
+from egoallo.hand_detection_structs import (
     SavedHamerOutputs,
     SingleHandHamerOutputWrtCamera,
 )

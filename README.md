@@ -99,7 +99,7 @@ EgoAllo requires Python 3.12 or newer.
    You'll also need [jaxls](https://github.com/brentyi/jaxls):
 
    ```bash
-   pip install git+ssh://git@github.com/brentyi/jaxls.git
+   pip install git+https://github.com/brentyi/jaxls.git
    ```
 
 2. **Running inference on example data.**
