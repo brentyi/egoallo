@@ -16,7 +16,7 @@ classifiers = [
 ]
 dependencies = [
     "torch>2.2",
-    "viser",
+    "viser>=0.2.11",
     "typeguard",
     "jaxtyping",
     "einops",
