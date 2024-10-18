@@ -542,7 +542,6 @@ def visualize_traj_and_hand_detections(
             event.client.send_file_download("ego_video.mp4", ego_video_bytes)
 
     prev_time = time.time()
-
     handle = None
 
     def loop_cb() -> int:

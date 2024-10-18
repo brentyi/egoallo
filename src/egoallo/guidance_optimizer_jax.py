@@ -140,8 +140,18 @@ def _optimize_vmapped(
     )
 
 
+# Modes for guidance.
 GuidanceMode = Literal[
-    "no_hands", "aria_wrist_only", "aria_hamer", "hamer_wrist", "hamer_reproj2", "off"
+    # Foot skating only.
+    "no_hands",
+    # Only use Aria wrist pose.
+    "aria_wrist_only",
+    # Use Aria wrist pose + HaMeR 3D estimates.
+    "aria_hamer",
+    # Use only HaMeR 3D estimates.
+    "hamer_wrist",
+    # Use HaMeR 3D estimates + reprojection.
+    "hamer_reproj2",
 ]
 
 
@@ -282,8 +292,6 @@ class JaxGuidanceParams:
                     max_iters=20,
                 ),
             }[phase]
-        elif mode == "off":
-            assert False
         else:
             assert_never(mode)
 
@@ -299,7 +307,7 @@ def _optimize(
     hamer_detections: dict | None,
     aria_detections: dict | None,
 ) -> tuple[jax.Array, dict]:
-    """Apply constraints using Gauss-Newton optimization. Returns updated
+    """Apply constraints using Levenberg-Marquardt optimizer. Returns updated
     body_rotmats and hand_rotmats matrices."""
     timesteps = body_rotmats.shape[0]
     assert Ts_world_cpf.shape == (timesteps, 7)
@@ -314,7 +322,7 @@ def _optimize(
     ).wxyz
     assert init_quats.shape == (timesteps, 51, 4)
 
-    # Assume body shape is time-invariant...
+    # Assume body shape is time-invariant.
     shaped_body = body.with_shape(jnp.mean(betas, axis=0))
     T_head_cpf = shaped_body.get_T_head_cpf()
     T_cpf_head = jaxlie.SE3(T_head_cpf).inverse().parameters()
@@ -339,6 +347,7 @@ def _optimize(
     assert pairwise_contacts.shape == (timesteps - 1, num_foot_joints)
     del contacts
 
+    # We'll populate a list of factors (cost terms).
     factors = list[jaxls.Factor]()
 
     def cost_with_args[*CostArgs](
@@ -362,10 +371,9 @@ def _optimize(
         var: _SmplhBodyPosesVar,
         left_hand: _SmplhSingleHandPosesVar | None = None,
         right_hand: _SmplhSingleHandPosesVar | None = None,
-        # Is the output "world" actually the world??
-        # This is a little confusing : ' )
         output_frame: Literal["world", "root"] = "world",
     ) -> fncsmpl_jax.SmplhShapedAndPosed:
+        """Helper for computing forward kinematics from variables."""
         assert (left_hand is None) == (right_hand is None)
         if left_hand is None and right_hand is None:
             posed = shaped_body.with_pose(

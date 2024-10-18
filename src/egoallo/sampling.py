@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-from typing import Literal
 
 import numpy as np
 import torch
@@ -12,7 +11,6 @@ from tqdm.auto import tqdm
 from . import fncsmpl, network
 from .guidance_optimizer_jax import (
     GuidanceMode,
-    JaxGuidanceParams,
     do_guidance_optimization,
 )
 from .hand_detection_structs import (
@@ -59,96 +57,6 @@ class CosineNoiseScheduleConstants(TensorDataclass):
         return CosineNoiseScheduleConstants(
             alpha_t=alpha_t, alpha_bar_t=alpha_cumprod_t
         )
-
-
-def run_sampling(
-    # TODO fix
-    # TODO (April 16, 2024): ^ I don't remember what this 'fix' comment is referring to... : ' )
-    denoiser_network: network.EgoDenoiser,
-    body_model: fncsmpl.SmplhModel,
-    guidance_constraint_optimizer: None | Literal["adam", "lbfgs"] | JaxGuidanceParams,
-    Ts_world_cpf: Float[Tensor, "time 7"],
-    hand_detections: None | CorrespondedHamerDetections,
-    num_samples: int,
-    device: torch.device,
-) -> network.EgoDenoiseTraj:
-    noise_constants = CosineNoiseScheduleConstants.compute(timesteps=1000).to(
-        device=device
-    )
-    alpha_bar_t = noise_constants.alpha_bar_t
-    alpha_t = noise_constants.alpha_t
-
-    T_cpf_tm1_cpf_t = (
-        SE3(Ts_world_cpf[..., :-1, :]).inverse() @ SE3(Ts_world_cpf[..., 1:, :])
-    ).wxyz_xyz
-
-    x_t_packed = torch.randn(
-        (num_samples, Ts_world_cpf.shape[0] - 1, denoiser_network.get_d_state()),
-        device=device,
-    )
-    x_t_list = [
-        network.EgoDenoiseTraj.unpack(
-            x_t_packed, include_hands=denoiser_network.config.include_hands
-        )
-    ]
-    ts = quadratic_ts()
-
-    for i in tqdm(range(len(ts) - 1)):
-        print(f"Sampling {i}/{len(ts) - 1}")
-        t = ts[i]
-        t_next = ts[i + 1]
-
-        with torch.inference_mode():
-            x_0_packed_pred = denoiser_network.forward(
-                x_t_packed,
-                torch.tensor([t], device=device).expand((num_samples,)),
-                T_cpf_tm1_cpf_t=T_cpf_tm1_cpf_t[None, :, :].repeat((num_samples, 1, 1)),
-                T_world_cpf=Ts_world_cpf[None, 1:, :].repeat((num_samples, 1, 1)),
-                project_output_rotmats=True,
-                hand_positions_wrt_cpf=None,  # TODO: this should be filled in!!
-                mask=None,
-            )
-        if torch.any(torch.isnan(x_0_packed_pred)):
-            print("found nan", i)
-        sigma_t = torch.cat(
-            [
-                torch.zeros((1,), device=device),
-                torch.sqrt(
-                    (1.0 - alpha_bar_t[:-1]) / (1 - alpha_bar_t[1:]) * (1 - alpha_t)
-                )
-                * 0.8,
-            ]
-        )
-        if guidance_constraint_optimizer is not None:
-            x_t_packed = do_guidance_optimization(
-                Ts_world_cpf=Ts_world_cpf[None, 1:, :].repeat(num_samples, 1, 1),
-                body_model=body_model,
-                traj=network.EgoDenoiseTraj.unpack(
-                    x_t_packed, include_hands=denoiser_network.config.include_hands
-                ),
-                hand_detections=hand_detections,
-                optimizer=guidance_constraint_optimizer,
-                optimizer_iters={"lbfgs": 5, "adam": 10}[guidance_constraint_optimizer],
-                use_hand_reprojection=False,
-            ).pack()
-
-        # print(sigma_t)
-        x_t_packed = (
-            torch.sqrt(alpha_bar_t[t_next]) * x_0_packed_pred
-            + (
-                torch.sqrt(1 - alpha_bar_t[t_next] - sigma_t[t] ** 2)
-                * (x_t_packed - torch.sqrt(alpha_bar_t[t]) * x_0_packed_pred)
-                / torch.sqrt(1 - alpha_bar_t[t] + 1e-1)
-            )
-            + sigma_t[t] * torch.randn(x_0_packed_pred.shape, device=device)
-        )
-        x_t_list.append(
-            network.EgoDenoiseTraj.unpack(
-                x_t_packed, include_hands=denoiser_network.config.include_hands
-            )
-        )
-
-    return x_t_list[-1]
 
 
 def run_sampling_with_stitching(

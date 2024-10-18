@@ -144,7 +144,7 @@ class EgoDenoiserConfig:
     """Whether to include hand joints (+15 per hand) in the denoised state."""
 
     cond_param: Literal[
-        "ours", "canonicalized", "absolute", "absrel", "absrel_avatarposer"
+        "ours", "canonicalized", "absolute", "absrel", "absrel_global_deltas"
     ] = "ours"
     """Which conditioning parameterization to use.
 
@@ -176,7 +176,7 @@ class EgoDenoiserConfig:
         elif self.cond_param == "absrel":
             # Both absolute and relative!
             d_cond = 24
-        elif self.cond_param == "absrel_avatarposer":
+        elif self.cond_param == "absrel_global_deltas":
             # Both absolute and relative!
             d_cond = 24
         else:
@@ -214,7 +214,12 @@ class EgoDenoiserConfig:
             if self.include_canonicalized_cpf_rotation_in_cond:
                 # We want the rotation to be invariant to rotations around the
                 # world Z axis. Visualization of what's happening here:
+                #
                 # https://gist.github.com/brentyi/9226d082d2707132af39dea92b8609f6
+                #
+                # (The coordinate frame may differ by some axis-swapping
+                # compared to the exact equations in the paper. But to the
+                # network these will all look the same.)
                 R_world_cpf = SE3(T_world_cpf).rotation().wxyz
                 forward_cpf = R_world_cpf.new_tensor([0.0, 0.0, 1.0])
                 forward_world = SO3(R_world_cpf) @ forward_cpf
@@ -230,6 +235,7 @@ class EgoDenoiserConfig:
                 )
             cond = torch.cat(cond_parts, dim=-1)
         elif self.cond_param == "canonicalized":
+            # Align the first timestep.
             # Put poses so start is at origin, facing forward.
             R_world_cpf = SE3(T_world_cpf[:, 0:1, :]).rotation().wxyz
             forward_cpf = R_world_cpf.new_tensor([0.0, 0.0, 1.0])
@@ -263,7 +269,7 @@ class EgoDenoiserConfig:
                 ],
                 dim=-1,
             )
-        elif self.cond_param == "absrel_avatarposer":
+        elif self.cond_param == "absrel_global_deltas":
             cond = torch.concatenate(
                 [
                     SE3(T_world_cpf)
@@ -284,6 +290,7 @@ class EgoDenoiserConfig:
             assert_never(self.cond_param)
 
         # Condition on hand poses as well.
+        # We didn't use this for the paper.
         if self.include_hand_positions_cond:
             if hand_positions_wrt_cpf is None:
                 logger.warning(

@@ -9,7 +9,8 @@ from torch import Tensor
 from torch._dynamo import OptimizedModule
 from torch.nn.parallel import DistributedDataParallel
 
-from . import data, network
+from . import network
+from .data.amass import EgoTrainingData
 from .sampling import CosineNoiseScheduleConstants
 from .transforms import SO3
 
@@ -27,7 +28,7 @@ class TrainingLossConfig:
             "hand_rotmats": 0.01,
         }.copy
     )
-    weight_loss_by_t: Literal["emulate_eps_pred"] | None = "emulate_eps_pred"
+    weight_loss_by_t: Literal["emulate_eps_pred"] = "emulate_eps_pred"
     """Weights to apply to the loss at each noise level."""
 
 
@@ -42,10 +43,12 @@ class TrainingLossComputer:
             .to(device)
             .map(lambda tensor: tensor.to(torch.float32))
         )
+
         # Emulate loss weight that would be ~equivalent to epsilon prediction.
         #
         # This will penalize later errors (close to the end of sampling) much
         # more than earlier ones (at the start of sampling).
+        assert self.config.weight_loss_by_t == "emulate_eps_pred"
         weight_t = self.noise_constants.alpha_bar_t / (
             1 - self.noise_constants.alpha_bar_t
         )
@@ -57,7 +60,7 @@ class TrainingLossComputer:
         self,
         model: network.EgoDenoiser | DistributedDataParallel | OptimizedModule,
         unwrapped_model: network.EgoDenoiser,
-        train_batch: data.EgoTrainingData,
+        train_batch: EgoTrainingData,
     ) -> tuple[Tensor, dict[str, Tensor | float]]:
         """Compute a training loss for the EgoDenoiser model.
 
@@ -189,6 +192,7 @@ class TrainingLossComputer:
         }
 
         # Include hand objective.
+        # We didn't use this in the paper.
         if unwrapped_model.config.include_hands:
             assert x_0_pred.hand_rotmats is not None
             assert x_0.hand_rotmats is not None
@@ -229,7 +233,6 @@ class TrainingLossComputer:
                     ),
                 )
             )
-            #
             # self.log(
             #     "train/hand_motion_proportion",
             #     torch.sum(hand_motion) / batch,
