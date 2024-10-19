@@ -1,10 +1,20 @@
 import abc
-from typing import ClassVar, Generic, Tuple, Type, TypeVar, Union, overload
+from typing import (
+    ClassVar,
+    Generic,
+    Self,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    final,
+    overload,
+    override,
+)
 
 import numpy as onp
 import torch
 from torch import Tensor
-from typing_extensions import Self, final, override
 
 GroupType = TypeVar("GroupType", bound="MatrixLieGroup")
 SEGroupType = TypeVar("SEGroupType", bound="SEBase")

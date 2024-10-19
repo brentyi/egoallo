@@ -1,8 +1,7 @@
 import dataclasses
-from typing import Any, Callable
+from typing import Any, Callable, Self, dataclass_transform
 
 import torch
-from typing_extensions import Self, dataclass_transform
 
 
 @dataclass_transform()

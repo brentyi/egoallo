@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
+from typing import Union, cast, override
 
 import numpy as np
 import torch
 from torch import Tensor
-from typing_extensions import Union, override
 
 from . import _base
 from ._so3 import SO3

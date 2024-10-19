@@ -188,7 +188,7 @@ def main(args: Args) -> None:
             hamer_detections,
             aria_detections,
             points_data=points_data,
-            splat_path=splat_path,
+            splat_path=traj_paths.splat_path,
             floor_z=floor_z,
         )
         while True:

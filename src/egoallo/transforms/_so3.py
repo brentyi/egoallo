@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, override
 
 import numpy as np
 import torch
 from torch import Tensor
-from typing_extensions import override
 
 from . import _base
 from .utils import get_epsilon, register_lie_group

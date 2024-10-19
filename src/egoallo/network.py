@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cache, cached_property
-from typing import Literal
+from typing import Literal, assert_never
 
 import numpy as np
 import torch
@@ -11,7 +11,6 @@ from jaxtyping import Bool, Float
 from loguru import logger
 from rotary_embedding_torch import RotaryEmbedding
 from torch import Tensor, nn
-from typing_extensions import assert_never
 
 from .fncsmpl import SmplhModel, SmplhShapedAndPosed
 from .tensor_dataclass import TensorDataclass

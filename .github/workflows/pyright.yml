@@ -1,0 +1,32 @@
+name: pyright
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pyright:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system -e .
+          uv pip install --system jax
+          uv pip install --system git+https://github.com/brentyi/jaxls.git
+          uv pip install --system git+https://github.com/brentyi/hamer_helper.git
+          uv pip install --system pyright
+      - name: Run pyright
+        run: |
+          pyright .

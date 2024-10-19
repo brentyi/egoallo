@@ -18,7 +18,7 @@ dependencies = [
     "torch>2.2",
     "viser>=0.2.11",
     "typeguard",
-    "jaxtyping",
+    "jaxtyping>=0.2.29",
     "einops",
     "rotary-embedding-torch",
     "h5py",
@@ -28,7 +28,8 @@ dependencies = [
     "tensorboardX",
     "loguru",
     "projectaria-tools[all]",
-    "opencv-python"
+    "opencv-python",
+    "gdown",
 ]
 
 [tool.setuptools.package-data]

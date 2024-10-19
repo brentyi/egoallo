@@ -8,10 +8,18 @@ import sys
 import time
 import traceback as tb
 from pathlib import Path
-from typing import Any, Dict, Generator, Iterable, Protocol, Sized, overload
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Iterable,
+    Protocol,
+    Sized,
+    get_type_hints,
+    overload,
+)
 
 import torch
-from typing_extensions import get_type_hints
 
 
 def flattened_hparam_dict_from_dataclass(

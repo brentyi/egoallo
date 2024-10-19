@@ -58,7 +58,7 @@ class EgoTrainingData(TensorDataclass):
 
     @staticmethod
     def load_from_npz(
-        body_model: fncsmpl.SmplModel,
+        body_model: fncsmpl.SmplhModel,
         path: Path,
         include_hands: bool,
     ) -> EgoTrainingData:

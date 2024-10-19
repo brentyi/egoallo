@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal, assert_never, cast
 
 import h5py
 import numpy as np
 import torch
 import torch.utils
 import torch.utils.data
-from typing_extensions import assert_never
 
 from .dataclass import EgoTrainingData
 
