@@ -230,7 +230,7 @@ def run_wilor_and_save(
         shutil.rmtree(render_out_path, ignore_errors=True)
     render_out_path.mkdir(exist_ok=True)
     wilor_helper = WiLoRHelper(wilor_home)
-    hamer_helper = HamerHelper()
+    hamer_helper = HamerHelper(other_detector=True)
 
     # VRS data provider setup.
     provider = create_vrs_data_provider(str(vrs_path.absolute()))
@@ -389,7 +389,7 @@ def run_aria_hamer_and_save(
         shutil.rmtree(render_out_path, ignore_errors=True)
 
     render_out_path.mkdir(exist_ok=True)
-    hamer_helper = HamerHelper()
+    hamer_helper = HamerHelper(other_detector=True)
 
     # VRS data provider setup.
     provider = create_vrs_data_provider(str(vrs_path.absolute()))
