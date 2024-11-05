@@ -1,4 +1,9 @@
-"""Translate data from HuMoR-style npz format to an hdf5-based one."""
+"""Translate data from HuMoR-style npz format to an hdf5-based one.
+
+Due to licensing, we unfortunately can't re-distribute our preprocessed dataset.
+
+For generating it yourself, the inputs to this script can be first computed by following HuMoR: https://github.com/davrempe/humor/tree/main/data
+"""
 
 import queue
 import threading
