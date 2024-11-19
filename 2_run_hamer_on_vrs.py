@@ -12,15 +12,12 @@ from egoallo.hand_detection_structs import (
     SavedHamerOutputs,
     SingleHandHamerOutputWrtCamera,
 )
-
+from hamer_helper import HamerHelper
 from projectaria_tools.core import calibration
 from projectaria_tools.core.data_provider import (
     VrsDataProvider,
     create_vrs_data_provider,
 )
-from _hamer_helper import HamerHelper
-import projectaria_tools.core.mps as mps
-from projectaria_tools.core.sensor_data import DEVICE_TIME
 from tqdm.auto import tqdm
 
 from egoallo.inference_utils import InferenceTrajectoryPaths
@@ -40,32 +37,33 @@ def main(traj_root: Path, detector: str = "hamer",overwrite: bool = False, wilor
     """
 
     paths = InferenceTrajectoryPaths.find(traj_root)
+
     vrs_path = paths.vrs_file
     assert vrs_path.exists()
     
     if detector == "wilor":
-        render_out_path = traj_root / "wilor_outputs_unrot_render"  # This is just for debugging.
         pickle_out = traj_root / "wilor_outputs.pkl"
+        render_out_path = traj_root / "wilor_outputs_unrot_render"  # This is just for debugging.
         run_wilor_and_save(vrs_path, pickle_out, render_out_path, overwrite, wilor_home)
     elif detector == "hamer":
-        render_out_path = traj_root / "hamer_outputs_render"  # This is just for debugging.
         pickle_out = traj_root / "hamer_outputs.pkl"
+        render_out_path = traj_root / "hamer_outputs_render"  # This is just for debugging.
         run_hamer_and_save(vrs_path, pickle_out, render_out_path, overwrite)
     else:
         raise ValueError(f"Unknown detector: {detector}")
 
 
 def run_hamer_and_save(
-    vrs_path: Path, pickle_out: Path, render_out_path: Path, overwrite: bool
+    vrs_path: Path, pickle_out: Path, hamer_render_out: Path, overwrite: bool
 ) -> None:
     if not overwrite:
         assert not pickle_out.exists()
-        assert not render_out_path.exists()
+        assert not hamer_render_out.exists()
     else:
         pickle_out.unlink(missing_ok=True)
-        shutil.rmtree(render_out_path, ignore_errors=True)
+        shutil.rmtree(hamer_render_out, ignore_errors=True)
 
-    render_out_path.mkdir(exist_ok=True)
+    hamer_render_out.mkdir(exist_ok=True)
     hamer_helper = HamerHelper()
 
     # VRS data provider setup.
@@ -187,9 +185,9 @@ def run_hamer_and_save(
             font_scale=10.0 / 2880.0 * undistorted_image.shape[0],
         )
 
-        print(f"Saving image {i:06d} to {render_out_path / f'{i:06d}.jpeg'}")
+        print(f"Saving image {i:06d} to {hamer_render_out / f'{i:06d}.jpeg'}")
         iio.imwrite(
-            str(render_out_path / f"{i:06d}.jpeg"),
+            str(hamer_render_out / f"{i:06d}.jpeg"),
             np.concatenate(
                 [
                     # Darken input image, just for contrast...

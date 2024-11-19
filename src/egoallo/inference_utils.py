@@ -65,6 +65,7 @@ class InferenceTrajectoryPaths:
     def find(traj_root: Path, detector: str="hamer") -> InferenceTrajectoryPaths:
         vrs_files = tuple(traj_root.glob("**/*.vrs"))
         assert len(vrs_files) == 1, f"Found {len(vrs_files)} VRS files!"
+
         points_paths = tuple(traj_root.glob("**/semidense_points.csv.gz"))
         assert len(points_paths) <= 1, f"Found multiple points files! {points_paths}"
         if len(points_paths) == 0:
