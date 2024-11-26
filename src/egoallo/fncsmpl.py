@@ -26,16 +26,14 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import typeguard
 from einops import einsum
-from jaxtyping import Float, Int, jaxtyped
+from jaxtyping import Float, Int
 from torch import Tensor
 
 from .tensor_dataclass import TensorDataclass
 from .transforms import SE3, SO3
 
 
-@jaxtyped(typechecker=typeguard.typechecked)
 class SmplhModel(TensorDataclass):
     """A human body model from the SMPL family."""
 
@@ -118,7 +116,6 @@ class SmplhModel(TensorDataclass):
         )
 
 
-@jaxtyped(typechecker=typeguard.typechecked)
 class SmplhShaped(TensorDataclass):
     """The SMPL-H body model with a body shape applied."""
 
@@ -183,7 +180,6 @@ class SmplhShaped(TensorDataclass):
         )
 
 
-@jaxtyped(typechecker=typeguard.typechecked)
 class SmplhShapedAndPosed(TensorDataclass):
     shaped_model: SmplhShaped
     """Underlying shaped body model."""
@@ -266,7 +262,6 @@ class SmplhShapedAndPosed(TensorDataclass):
         )
 
 
-@jaxtyped(typechecker=typeguard.typechecked)
 class SmplMesh(TensorDataclass):
     """Outputs from the SMPL-H model."""
 

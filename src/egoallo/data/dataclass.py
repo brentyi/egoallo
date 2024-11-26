@@ -5,8 +5,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.utils.data
-import typeguard
-from jaxtyping import Bool, Float, jaxtyped
+from jaxtyping import Bool, Float
 from torch import Tensor
 
 from .. import fncsmpl, fncsmpl_extensions
@@ -14,7 +13,6 @@ from .. import transforms as tf
 from ..tensor_dataclass import TensorDataclass
 
 
-@jaxtyped(typechecker=typeguard.typechecked)
 class EgoTrainingData(TensorDataclass):
     """Dictionary of tensors we use for EgoAllo training."""
 
