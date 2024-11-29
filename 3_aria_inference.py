@@ -38,6 +38,8 @@ class Args:
             ...
         ...
     """
+    detector: str = "hamer"
+    """for choosing pkl file. choose from ["hamer", "wilor"]"""
     checkpoint_dir: Path = Path("./egoallo_checkpoint_april13/checkpoints_3000000/")
     smplh_npz_path: Path = Path("./data/smplh/neutral/model.npz")
 
@@ -66,7 +68,7 @@ class Args:
 def main(args: Args) -> None:
     device = torch.device("cuda")
 
-    traj_paths = InferenceTrajectoryPaths.find(args.traj_root)
+    traj_paths = InferenceTrajectoryPaths.find(args.traj_root, detector=args.detector)
     if traj_paths.splat_path is not None:
         print("Found splat at", traj_paths.splat_path)
     else:
@@ -151,10 +153,14 @@ def main(args: Args) -> None:
             time.strftime("%Y%m%d-%H%M%S")
             + f"_{args.start_index}-{args.start_index + args.traj_length}"
         )
-        out_path = args.traj_root / "egoallo_outputs" / (save_name + ".npz")
+        if args.detector == "hamer":
+            egoallo_dir = "egoallo_outputs"
+        elif args.detector == "wilor":
+            egoallo_dir = "wilor_egoallo_outputs"
+        out_path = args.traj_root / egoallo_dir / (save_name + ".npz")
         out_path.parent.mkdir(parents=True, exist_ok=True)
         assert not out_path.exists()
-        (args.traj_root / "egoallo_outputs" / (save_name + "_args.yaml")).write_text(
+        (args.traj_root / egoallo_dir / (save_name + "_args.yaml")).write_text(
             yaml.dump(dataclasses.asdict(args))
         )
 
