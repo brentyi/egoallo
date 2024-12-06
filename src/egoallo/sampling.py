@@ -9,10 +9,7 @@ from torch import Tensor
 from tqdm.auto import tqdm
 
 from . import fncsmpl, network
-from .guidance_optimizer_jax import (
-    GuidanceMode,
-    do_guidance_optimization,
-)
+from .guidance_optimizer_jax import GuidanceMode, do_guidance_optimization
 from .hand_detection_structs import (
     CorrespondedAriaHandWristPoseDetections,
     CorrespondedHamerDetections,
@@ -179,6 +176,28 @@ def run_sampling_with_stitching(
         )
 
         if guidance_mode != "off" and guidance_inner:
+            import pickle
+
+            # Write the do_guidance_optimization inputs to a pickle file.
+            output_path = f"guidance_optimization_inputs.pkl"
+            with open(output_path, "wb") as f:
+                pickle.dump(
+                    {
+                        "Ts_world_cpf": Ts_world_cpf[1:, :],
+                        "traj": network.EgoDenoiseTraj.unpack(
+                            x_0_packed_pred,
+                            include_hands=denoiser_network.config.include_hands,
+                        ),
+                        "body_model": body_model,
+                        "guidance_mode": guidance_mode,
+                        "phase": "inner",
+                        "hamer_detections": hamer_detections,
+                        "aria_detections": aria_detections,
+                    },
+                    f,
+                )
+                exit()
+
             x_0_pred, _ = do_guidance_optimization(
                 # It's important that we _don't_ use the shifted transforms here.
                 Ts_world_cpf=Ts_world_cpf[1:, :],

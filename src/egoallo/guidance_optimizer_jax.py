@@ -42,6 +42,7 @@ def do_guidance_optimization(
 ) -> tuple[network.EgoDenoiseTraj, dict]:
     """Run an optimizer to apply foot contact constraints."""
 
+    assert len(Ts_world_cpf.shape) == 2
     assert traj.hand_rotmats is not None
     guidance_params = JaxGuidanceParams.defaults(guidance_mode, phase)
 
