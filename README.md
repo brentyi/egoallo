@@ -6,12 +6,12 @@
 Code release for our preprint:
 
 <table><tr><td>
-    Brent Yi<sup>1</sup>, Vickie Ye<sup>1</sup>, Maya Zheng<sup>1</sup>, Lea M&uuml;ller<sup>1</sup>, Georgios Pavlakos<sup>2</sup>, Yi Ma<sup>1</sup>, Jitendra Malik<sup>1</sup>, and Angjoo Kanazawa<sup>1</sup>.
+    Brent Yi<sup>1</sup>, Vickie Ye<sup>1</sup>, Maya Zheng<sup>1</sup>, Yunqi Li<sup>2</sup>, Lea M&uuml;ller<sup>1</sup>, Georgios Pavlakos<sup>3</sup>, Yi Ma<sup>1</sup>, Jitendra Malik<sup>1</sup>, and Angjoo Kanazawa<sup>1</sup>.
     <strong>Estimating Body and Hand Motion in an Ego-sensed World.</strong>
     arXiV, 2024.
 </td></tr>
 </table>
-<sup>1</sup><em>UC Berkeley</em>, <sup>2</sup><em>UT Austin</em>
+<sup>1</sup><em>UC Berkeley</em>, <sup>2</sup><em>ShanghaiTech</em>, <sup>3</sup><em>UT Austin</em>
 
 ---
 
