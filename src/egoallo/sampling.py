@@ -9,10 +9,7 @@ from torch import Tensor
 from tqdm.auto import tqdm
 
 from . import fncsmpl, network
-from .guidance_optimizer_jax import (
-    GuidanceMode,
-    do_guidance_optimization,
-)
+from .guidance_optimizer_jax import GuidanceMode, do_guidance_optimization
 from .hand_detection_structs import (
     CorrespondedAriaHandWristPoseDetections,
     CorrespondedHamerDetections,
@@ -71,6 +68,7 @@ def run_sampling_with_stitching(
     aria_detections: None | CorrespondedAriaHandWristPoseDetections,
     num_samples: int,
     device: torch.device,
+    guidance_verbose: bool = True,
 ) -> network.EgoDenoiseTraj:
     # Offset the T_world_cpf transform to place the floor at z=0 for the
     # denoiser network. All of the network outputs are local, so we don't need to
@@ -190,6 +188,7 @@ def run_sampling_with_stitching(
                 phase="inner",
                 hamer_detections=hamer_detections,
                 aria_detections=aria_detections,
+                verbose=guidance_verbose,
             )
             x_0_packed_pred = x_0_pred.pack()
             del x_0_pred
@@ -224,6 +223,7 @@ def run_sampling_with_stitching(
             phase="post",
             hamer_detections=hamer_detections,
             aria_detections=aria_detections,
+            verbose=guidance_verbose,
         )
         assert start_time is not None
         print("RUNTIME (exclude first optimization)", time.time() - start_time)

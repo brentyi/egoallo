@@ -39,6 +39,7 @@ def do_guidance_optimization(
     phase: Literal["inner", "post"],
     hamer_detections: None | CorrespondedHamerDetections,
     aria_detections: None | CorrespondedAriaHandWristPoseDetections,
+    verbose: bool,
 ) -> tuple[network.EgoDenoiseTraj, dict]:
     """Run an optimizer to apply foot contact constraints."""
 
@@ -70,6 +71,7 @@ def do_guidance_optimization(
         aria_detections=None
         if aria_detections is None
         else aria_detections.as_nested_dict(numpy=True),
+        verbose=verbose,
     )
     rotmats = SO3(
         torch.from_numpy(onp.array(quats))
@@ -122,6 +124,7 @@ def _optimize_vmapped(
     guidance_params: JaxGuidanceParams,
     hamer_detections: dict | None,
     aria_detections: dict | None,
+    verbose: jdc.Static[bool],
 ) -> tuple[jax.Array, dict]:
     return jax.vmap(
         partial(
@@ -131,6 +134,7 @@ def _optimize_vmapped(
             guidance_params=guidance_params,
             hamer_detections=hamer_detections,
             aria_detections=aria_detections,
+            verbose=verbose,
         )
     )(
         betas=betas,
@@ -306,6 +310,7 @@ def _optimize(
     guidance_params: JaxGuidanceParams,
     hamer_detections: dict | None,
     aria_detections: dict | None,
+    verbose: bool,
 ) -> tuple[jax.Array, dict]:
     """Apply constraints using Levenberg-Marquardt optimizer. Returns updated
     body_rotmats and hand_rotmats matrices."""
@@ -867,6 +872,7 @@ def _optimize(
             lambda_initial=guidance_params.lambda_initial
         ),
         termination=jaxls.TerminationConfig(max_iterations=guidance_params.max_iters),
+        verbose=verbose,
     )
     out_body_quats = solutions[_SmplhBodyPosesVar]
     assert out_body_quats.shape == (timesteps, 21, 4)
