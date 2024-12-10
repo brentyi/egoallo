@@ -1,7 +1,25 @@
 """Example script for computing body metrics on the test split of the AMASS dataset.
 
-This is a tidied version of the code we used to compute metrics in our paper.
-Some context: https://github.com/brentyi/egoallo/issues/7
+This is not the exact script we used for the paper metrics, but should have the
+details that matter matched. Below are some metrics from this script when our
+released checkpoint is passed in.
+
+For --subseq-len 128:
+
+     mpjpe 118.340 +/- 1.350             (in paper: 119.7 +/- 1.3)
+     pampjpe 100.026 +/- 1.349           (in paper: 101.1 +/- 1.3)
+     T_head 0.006 +/- 0.000              (in paper: 0.0062 +/- 0.0001)
+     foot_contact (GND) 1.000 +/- 0.000  (in paper: 1.0 +/- 0.0)
+     foot_skate 0.417 +/- 0.017          (not reported in paper)
+
+
+For --subseq-len 32:
+
+     mpjpe 129.193 +/- 1.108             (in paper: 129.8 +/- 1.1)
+     pampjpe 109.489 +/- 1.147           (in paper: 109.8 +/- 1.1)
+     T_head 0.006 +/- 0.000              (in paper: 0.0064 +/- 0.0001)
+     foot_contact (GND) 0.985 +/- 0.003  (in paper: 0.98 +/- 0.00)
+     foot_skate 0.185 +/- 0.005          (not reported in paper)
 """
 
 from pathlib import Path
