@@ -42,6 +42,8 @@ This repository is structured as follows:
 │                            - Run full pipeline on inference data.
 ├── 4_visualize_outputs.py
 │                            - Visualize outputs from inference.
+├── 5_eval_body_metrics.py
+│                            - Compute and print body estimation accuracy metrics.
 │
 ├── src/egoallo/
 │   ├── data/                - Dataset utilities.
