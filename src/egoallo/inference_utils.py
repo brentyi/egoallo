@@ -62,7 +62,7 @@ class InferenceTrajectoryPaths:
     splat_path: Path | None
 
     @staticmethod
-    def find(traj_root: Path) -> InferenceTrajectoryPaths:
+    def find(traj_root: Path, detector: str="hamer") -> InferenceTrajectoryPaths:
         vrs_files = tuple(traj_root.glob("**/*.vrs"))
         assert len(vrs_files) == 1, f"Found {len(vrs_files)} VRS files!"
 
@@ -71,8 +71,8 @@ class InferenceTrajectoryPaths:
         if len(points_paths) == 0:
             points_paths = tuple(traj_root.glob("**/global_points.csv.gz"))
         assert len(points_paths) == 1, f"Found {len(points_paths)} files!"
-
-        hamer_outputs = traj_root / "hamer_outputs.pkl"
+        pickle_file_name = detector + "_outputs.pkl"
+        hamer_outputs = traj_root / pickle_file_name
         if not hamer_outputs.exists():
             hamer_outputs = None
 
