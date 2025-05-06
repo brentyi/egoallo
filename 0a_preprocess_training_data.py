@@ -33,12 +33,13 @@ from egoallo.preprocessing.util import move_to
 AMASS_SPLITS = {
     "train": [
         "ACCAD",
-        "BioMotionLab_NTroje",
         "BMLhandball",
         "BMLmovi",
+        "BioMotionLab_NTroje",
         "CMU",
+        "DFaust_67",
         "DanceDB",
-        "DFaust_67EKUT",
+        "EKUT",
         "Eyes_Japan_Dataset",
         "KIT",
         "MPI_Limits",
