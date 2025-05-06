@@ -38,7 +38,7 @@ dependencies = [
 egoallo = ["py.typed"]
 
 [tool.pyright]
-ignore = ["**/preprocessing/**", "**/0a_preprocessing.py"]
+ignore = ["**/preprocessing/**", "./0a_preprocess_training_data.py"]
 
 [tool.ruff.lint]
 select = [
