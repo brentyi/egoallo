@@ -30,10 +30,15 @@ dependencies = [
     "projectaria-tools[all]",
     "opencv-python",
     "gdown",
+    "scikit-learn", # Only needed for preprocessing
+    "smplx", # Only needed for preprocessing
 ]
 
 [tool.setuptools.package-data]
 egoallo = ["py.typed"]
+
+[tool.pyright]
+ignore = ["**/preprocessing/**", "**/0a_preprocessing.py"]
 
 [tool.ruff.lint]
 select = [
@@ -50,7 +55,6 @@ ignore = [
     "E501",  # Line too long.
     "E721",  # Do not compare types, use `isinstance()`.
     "F722",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
-    "F731",  # Do not assign a lambda expression, use a def.
     "F821",  # Forward annotation false positive from jaxtyping. Should be caught by pyright.
     "PLR2004",  # Magic value used in comparison.
     "PLR0915",  # Too many statements.
