@@ -154,7 +154,7 @@ To train the motion prior model, we use data from the [AMASS dataset](https://am
 
    This script, adapted from HuMoR, processes raw AMASS data by:
 
-   - Converting to gender-neutral SMPL parameters
+   - Converting to gender-neutral SMPL-H parameters
    - Computing contact labels for feet, hands, and knees
    - Filtering out problematic sequences (treadmill walking, sequences with foot skating)
    - Downsampling to 30fps
