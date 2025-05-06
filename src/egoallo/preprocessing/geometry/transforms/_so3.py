@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Union, override
+from typing import Optional, Tuple
+import dataclasses
 
-import numpy as np
+import math
 import torch
-from torch import Tensor
+from typing_extensions import override
 
-from . import _base
+from . import _base, hints
 from .utils import get_epsilon, register_lie_group
 
 
@@ -17,9 +17,11 @@ from .utils import get_epsilon, register_lie_group
     tangent_dim=3,
     space_dim=3,
 )
-@dataclass(frozen=True)
+@dataclasses.dataclass
 class SO3(_base.SOBase):
     """Special orthogonal group for 3D rotations.
+
+    Ported to pytorch from `jaxlie.SO3`.
 
     Internal parameterization is `(qw, qx, qy, qz)`. Tangent parameterization is
     `(omega_x, omega_y, omega_z)`.
@@ -27,106 +29,132 @@ class SO3(_base.SOBase):
 
     # SO3-specific.
 
-    wxyz: Tensor
+    wxyz: torch.Tensor
     """Internal parameters. `(w, x, y, z)` quaternion."""
 
     @override
     def __repr__(self) -> str:
-        wxyz = np.round(self.wxyz.numpy(force=True), 5)
+        wxyz = torch.round(self.wxyz, decimals=5)
         return f"{self.__class__.__name__}(wxyz={wxyz})"
 
     @staticmethod
-    def from_x_radians(theta: Tensor) -> SO3:
-        """Generates a x-axis rotation.
-
-        Args:
-            angle: X rotation, in radians.
-
-        Returns:
-            Output.
+    def from_x_radians(theta: torch.Tensor) -> SO3:
         """
-        zeros = torch.zeros_like(theta)
-        return SO3.exp(torch.stack([theta, zeros, zeros], dim=-1))
+        Generates a x-axis rotation.
+        :param theta (tensor) x rotation
+        :returns SO3 object
+        """
+        zero = torch.zeros_like(theta)
+        return SO3.exp(torch.stack([theta, zero, zero], dim=-1))
 
     @staticmethod
-    def from_y_radians(theta: Tensor) -> SO3:
-        """Generates a y-axis rotation.
-
-        Args:
-            angle: Y rotation, in radians.
-
-        Returns:
-            Output.
+    def from_y_radians(theta: torch.Tensor) -> SO3:
         """
-        zeros = torch.zeros_like(theta)
-        return SO3.exp(torch.stack([zeros, theta, zeros], dim=-1))
+        Generates a y-axis rotation.
+        :param theta (tensor) y rotation
+        :returns SO3 object
+        """
+        zero = torch.zeros_like(theta)
+        return SO3.exp(torch.stack([zero, theta, zero], dim=-1))
 
     @staticmethod
-    def from_z_radians(theta: Tensor) -> SO3:
-        """Generates a z-axis rotation.
-
-        Args:
-            angle: Z rotation, in radians.
-
-        Returns:
-            Output.
+    def from_z_radians(theta: torch.Tensor) -> SO3:
         """
-        zeros = torch.zeros_like(theta)
-        return SO3.exp(torch.stack([zeros, zeros, theta], dim=-1))
+        Generates a z-axis rotation.
+        :param theta (tensor) z rotation
+        :returns SO3 object
+        """
+        zero = torch.zeros_like(theta)
+        return SO3.exp(torch.stack([zero, zero, theta], dim=-1))
 
     @staticmethod
     def from_rpy_radians(
-        roll: Tensor,
-        pitch: Tensor,
-        yaw: Tensor,
+        roll: torch.Tensor,
+        pitch: torch.Tensor,
+        yaw: torch.Tensor,
     ) -> SO3:
-        """Generates a transform from a set of Euler angles. Uses the ZYX mobile robot
-        convention.
-
+        """
+        Generates a transform from a set of Euler angles. Uses the ZYX convention.
         Args:
             roll: X rotation, in radians. Applied first.
             pitch: Y rotation, in radians. Applied second.
             yaw: Z rotation, in radians. Applied last.
-
-        Returns:
-            Output.
         """
-        return (
-            SO3.from_z_radians(yaw)
-            @ SO3.from_y_radians(pitch)
-            @ SO3.from_x_radians(roll)
-        )
+        Rz = SO3.from_z_radians(yaw)
+        Ry = SO3.from_y_radians(pitch)
+        Rx = SO3.from_x_radians(roll)
+        return Rz.mul(Ry.mul(Rx))
 
     @staticmethod
-    def from_quaternion_xyzw(xyzw: Tensor) -> SO3:
-        """Construct a rotation from an `xyzw` quaternion.
-
+    def from_quaternion_xyzw(xyzw: torch.Tensor) -> SO3:
+        """
+        Construct a rotation from an `xyzw` quaternion.
         Note that `wxyz` quaternions can be constructed using the default dataclass
         constructor.
-
-        Args:
-            xyzw: xyzw quaternion. Shape should be (4,).
-
-        Returns:
-            Output.
+        :param xyzw (*, 4) quat in xyzw convention
+        :returns SO3 object
         """
-        assert xyzw.shape == (4,)
-        return SO3(torch.roll(xyzw, shifts=1, dims=-1))
+        assert xyzw.shape[-1] == 4
+        return SO3(torch.roll(xyzw, shift=1, dims=-1))
 
-    def as_quaternion_xyzw(self) -> Tensor:
+    def as_quaternion_xyzw(self) -> torch.Tensor:
         """Grab parameters as xyzw quaternion."""
-        return torch.roll(self.wxyz, shifts=-1, dims=-1)
+        return torch.roll(self.wxyz, shift=-1, dims=-1)
+
+    def as_rpy_radians(self) -> hints.RollPitchYaw:
+        """
+        Computes roll, pitch, and yaw angles. Uses the ZYX convention.
+        Returns:
+            Named tuple containing Euler angles in radians.
+        """
+        return hints.RollPitchYaw(
+            roll=self.compute_roll_radians(),
+            pitch=self.compute_pitch_radians(),
+            yaw=self.compute_yaw_radians(),
+        )
+
+    def compute_roll_radians(self) -> torch.Tensor:
+        """
+        Compute roll angle. Uses the ZYX convention.
+        :returns angle (*) if wxyz is (*, 4)
+        """
+        # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_angles_conversion
+        q0, q1, q2, q3 = self.wxyz.unbind(dim=-1)
+        return torch.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 ** 2 + q2 ** 2))
+
+    def compute_pitch_radians(self) -> torch.Tensor:
+        """
+        Compute pitch angle. Uses the ZYX convention.
+        :returns angle (*) if wxyz is (*, 4)
+        """
+        # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_angles_conversion
+        q0, q1, q2, q3 = self.wxyz.unbind(dim=-1)
+        return torch.asin(2 * (q0 * q2 - q3 * q1))
+
+    def compute_yaw_radians(self) -> torch.Tensor:
+        """
+        Compute yaw angle. Uses the ZYX convention.
+        :returns angle (*) if wxyz is (*, 4)
+        """
+        # https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Quaternion_to_Euler_angles_conversion
+        q0, q1, q2, q3 = self.wxyz.unbind(dim=-1)
+        return torch.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 ** 2 + q3 ** 2))
 
     # Factory.
 
-    @classmethod
+    @staticmethod
     @override
-    def identity(cls, device: Union[torch.device, str], dtype: torch.dtype) -> SO3:
-        return SO3(wxyz=torch.tensor([1.0, 0.0, 0.0, 0.0], device=device, dtype=dtype))
+    def Identity(shape: Optional[Tuple] = (), **kwargs) -> SO3:
+        id_elem = (
+            torch.tensor([1.0, 0.0, 0.0, 0.0], **kwargs)
+            .reshape(*(1,) * len(shape), 4)
+            .repeat(*shape, 1)
+        )
+        return SO3(wxyz=id_elem)
 
-    @classmethod
+    @staticmethod
     @override
-    def from_matrix(cls, matrix: Tensor) -> SO3:
+    def from_matrix(matrix: torch.Tensor) -> SO3:
         assert matrix.shape[-2:] == (3, 3)
 
         # Modified from:
@@ -200,18 +228,19 @@ class SO3(_base.SOBase):
             cond0,
             torch.where(cond1, case0_t, case1_t),
             torch.where(cond2, case2_t, case3_t),
-        )
+        ).unsqueeze(-1)
         q = torch.where(
-            cond0[..., None],
-            torch.where(cond1[..., None], case0_q, case1_q),
-            torch.where(cond2[..., None], case2_q, case3_q),
+            cond0.unsqueeze(-1),
+            torch.where(cond1.unsqueeze(-1), case0_q, case1_q),
+            torch.where(cond2.unsqueeze(-1), case2_q, case3_q),
         )
-        return SO3(wxyz=q * 0.5 / torch.sqrt(t[..., None]))
+
+        return SO3(wxyz=q * 0.5 / torch.sqrt(t))
 
     # Accessors.
 
     @override
-    def as_matrix(self) -> Tensor:
+    def matrix(self) -> torch.Tensor:
         norm_sq = torch.square(self.wxyz).sum(dim=-1, keepdim=True)
         qvec = self.wxyz * torch.sqrt(2.0 / norm_sq)  # (*, 4)
         Q = torch.einsum("...i,...j->...ij", qvec, qvec)  # (*, 4, 4)
@@ -231,22 +260,21 @@ class SO3(_base.SOBase):
         ).reshape(*qvec.shape[:-1], 3, 3)
 
     @override
-    def parameters(self) -> Tensor:
+    def parameters(self) -> torch.Tensor:
         return self.wxyz
 
     # Operations.
 
     @override
-    def apply(self, target: Tensor) -> Tensor:
+    def act(self, target: torch.Tensor) -> torch.Tensor:
         assert target.shape[-1] == 3
-
-        # Compute using quaternion multiplys.
+        # Compute using quaternion muls.
         padded_target = torch.cat([torch.ones_like(target[..., :1]), target], dim=-1)
-        out = self.multiply(SO3(wxyz=padded_target).multiply(self.inverse()))
+        out = self.mul(SO3(wxyz=padded_target).mul(self.inv()))
         return out.wxyz[..., 1:]
 
     @override
-    def multiply(self, other: SO3) -> SO3:  # type: ignore
+    def mul(self, other: SO3) -> SO3:
         w0, x0, y0, z0 = self.wxyz.unbind(dim=-1)
         w1, x1, y1, z1 = other.wxyz.unbind(dim=-1)
         wxyz2 = torch.stack(
@@ -261,9 +289,13 @@ class SO3(_base.SOBase):
 
         return SO3(wxyz=wxyz2)
 
-    @classmethod
+    @staticmethod
     @override
-    def exp(cls, tangent: Tensor) -> SO3:
+    def exp(tangent: torch.Tensor) -> SO3:
+        """
+        create SO3 object from axis angle tangent vector
+        :param tangent (*, 3)
+        """
         # Reference:
         # > https://github.com/strasdat/Sophus/blob/a0fe89a323e20c42d3cecb590937eb7a06b8343a/sophus/so3.hpp#L583
 
@@ -305,7 +337,11 @@ class SO3(_base.SOBase):
         )
 
     @override
-    def log(self) -> Tensor:
+    def log(self) -> torch.Tensor:
+        """
+        log map to tangent space
+        :return (*, 3) tangent vector
+        """
         # Reference:
         # > https://github.com/strasdat/Sophus/blob/a0fe89a323e20c42d3cecb590937eb7a06b8343a/sophus/so3.hpp#L247
 
@@ -327,10 +363,10 @@ class SO3(_base.SOBase):
         )
         atan_factor = torch.where(
             use_taylor,
-            2.0 / w_safe - 2.0 / 3.0 * norm_sq / w_safe**3,
+            2.0 / w_safe - 2.0 / 3.0 * norm_sq / w_safe ** 3,
             torch.where(
                 torch.abs(w) < get_epsilon(w.dtype),
-                torch.where(w > 0, 1.0, -1.0) * torch.pi / norm_safe,
+                torch.where(w > 0, 1.0, -1.0) * math.pi / norm_safe,
                 2.0 * atan_n_over_w / norm_safe,
             ),
         )
@@ -338,11 +374,11 @@ class SO3(_base.SOBase):
         return atan_factor * xyz
 
     @override
-    def adjoint(self) -> Tensor:
-        return self.as_matrix()
+    def adjoint(self) -> torch.Tensor:
+        return self.matrix()
 
     @override
-    def inverse(self) -> SO3:
+    def inv(self) -> SO3:
         # Negate complex terms.
         w, xyz = torch.split(self.wxyz, [1, 3], dim=-1)
         return SO3(wxyz=torch.cat([w, -xyz], dim=-1))

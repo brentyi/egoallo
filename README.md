@@ -76,7 +76,7 @@ EgoAllo requires Python 3.12 or newer.
 
 4. **Download the SMPL-H model file.**
 
-   You can find the "Extended SMPL+H model" from the [MANO project webpage](https://mano.is.tue.mpg.de/).
+   You can find the "Extended SMPL+H model" (16 shape parameters) from the [MANO project webpage](https://mano.is.tue.mpg.de/).
    Our scripts assumes an npz file located at `./data/smplh/neutral/model.npz`, but this can be overridden at the command-line (`--smplh-npz-path {your path}`).
 
 5. **Visualize model outputs.**
@@ -132,6 +132,41 @@ EgoAllo requires Python 3.12 or newer.
    ```bash
    python 2_run_hamer_on_vrs.py --traj-root ./egoallo_example_trajectories/coffeemachine
    ```
+
+## Preprocessing Training Data
+
+To train the motion prior model, we use data from the [AMASS dataset](https://amass.is.tue.mpg.de/). Due to licensing constraints, we cannot redistribute the preprocessed data. Instead, we provide two sequential preprocessing scripts:
+
+1. **Download the AMASS dataset.**
+
+   Download the AMASS dataset from the [official website](https://amass.is.tue.mpg.de/). We use the following splits:
+
+   - **Training**: ACCAD, BioMotionLab_NTroje, BMLhandball, BMLmovi, CMU, DanceDB, DFaust_67EKUT, Eyes_Japan_Dataset, KIT, MPI_Limits, TCD_handMocap, TotalCapture
+   - **Validation**: HumanEva, MPI_HDM05, SFU, MPI_mosh
+   - **Testing**: Transitions_mocap, SSM_synced
+
+2. **Run the first preprocessing script.**
+
+   ```bash
+   python 0a_preprocess_training_data.py --help
+   python 0a_preprocess_training_data.py --data-root /path/to/amass --smplh-root ./data/smplh
+   ```
+
+   This script, adapted from HuMoR, processes raw AMASS data by:
+
+   - Converting to gender-neutral SMPL-H parameters
+   - Computing contact labels for feet, hands, and knees
+   - Filtering out problematic sequences (treadmill walking, sequences with foot skating)
+   - Downsampling to 30fps
+
+3. **Run the second preprocessing script.**
+
+   ```bash
+   python 0b_preprocess_training_data.py --help
+   python 0b_preprocess_training_data.py --data-npz-dir ./data/processed_30fps_no_skating/
+   ```
+
+   This converts the processed NPZ files to a unified HDF5 format for more efficient training, with optimized chunk sizes for reading sequences.
 
 ## Status
 
