@@ -264,7 +264,7 @@ class SEBase(Generic[ContainedSOType], MatrixLieGroup):
 
     @final
     @override
-    def multiply(self: SEGroupType, other: SEGroupType) -> SEGroupType:
+    def multiply(self: SEGroupType, other: SEGroupType) -> SEGroupType:  # type: ignore
         return type(self).from_rotation_and_translation(
             rotation=self.rotation() @ other.rotation(),
             translation=(self.rotation() @ other.translation()) + self.translation(),

@@ -246,7 +246,7 @@ class SO3(_base.SOBase):
         return out.wxyz[..., 1:]
 
     @override
-    def multiply(self, other: SO3) -> SO3:
+    def multiply(self, other: SO3) -> SO3:  # type: ignore
         w0, x0, y0, z0 = self.wxyz.unbind(dim=-1)
         w1, x1, y1, z1 = other.wxyz.unbind(dim=-1)
         wxyz2 = torch.stack(
