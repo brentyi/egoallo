@@ -1,7 +1,8 @@
-"""
+"""Convert raw AMASS data to HuMoR-style npz format.
+
 Mostly taken from
-https://github.com/davrempe/humor/blob/main/humor/scripts/process_amass_data.py
-added gender neutral beta conversion and other utilities
+https://github.com/davrempe/humor/blob/main/humor/scripts/process_amass_data.py,
+but added gender neutral beta conversion and other utilities.
 """
 
 import dataclasses

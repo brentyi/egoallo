@@ -2,12 +2,6 @@
 
 Due to AMASS licensing, we unfortunately can't re-distribute our preprocessed dataset. If you have questions
 or run into issues, please reach out.
-
-To generate the npz format yourself, you can use our updated version of the `process_amass_data.py` script:
-- https://gist.github.com/brentyi/a52bfaee37734d30d60e3ab1a092e645
-
-Instructions for running this script can be found in the HuMoR repository:
-- https://github.com/davrempe/humor/tree/main/data
 """
 
 import queue
