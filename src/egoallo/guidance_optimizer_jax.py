@@ -856,7 +856,7 @@ def _optimize(
     vars_body_pose = _SmplhBodyPosesVar(jnp.arange(timesteps))
     vars_hand_pose = _SmplhSingleHandPosesVar(jnp.arange(timesteps * 2))
     graph = jaxls.LeastSquaresProblem(
-        factors=factors, variables=[vars_body_pose, vars_hand_pose], use_onp=False
+        costs=factors, variables=[vars_body_pose, vars_hand_pose]
     ).analyze()
     solutions = graph.solve(
         initial_vals=jaxls.VarValues.make(
