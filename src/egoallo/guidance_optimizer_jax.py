@@ -353,7 +353,7 @@ def _optimize(
     del contacts
 
     # We'll populate a list of factors (cost terms).
-    factors = list[jaxls.Factor]()
+    factors = list[jaxls.Cost]()
 
     def cost_with_args[*CostArgs](
         *args: Unpack[tuple[*CostArgs]],
@@ -366,7 +366,7 @@ def _optimize(
         def inner(
             cost_func: Callable[[jaxls.VarValues, *CostArgs], jax.Array],
         ) -> Callable[[jaxls.VarValues, *CostArgs], jax.Array]:
-            factors.append(jaxls.Factor.make(cost_func, args))
+            factors.append(jaxls.Cost(cost_func, args))
             return cost_func
 
         return inner
@@ -855,9 +855,9 @@ def _optimize(
 
     vars_body_pose = _SmplhBodyPosesVar(jnp.arange(timesteps))
     vars_hand_pose = _SmplhSingleHandPosesVar(jnp.arange(timesteps * 2))
-    graph = jaxls.FactorGraph.make(
+    graph = jaxls.LeastSquaresProblem(
         factors=factors, variables=[vars_body_pose, vars_hand_pose], use_onp=False
-    )
+    ).analyze()
     solutions = graph.solve(
         initial_vals=jaxls.VarValues.make(
             [
