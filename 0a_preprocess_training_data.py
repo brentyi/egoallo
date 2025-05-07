@@ -9,6 +9,7 @@ import dataclasses
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
 from typing import Dict, Tuple
 
 import matplotlib.pyplot as plt
@@ -724,15 +725,6 @@ def process_seq_data(
     np.savez(out_path, **meta, **out_dict)
 
 
-def find_ext_recursive(root, ext=".npz"):
-    paths = []
-    for curdir, _, files in os.walk(root):
-        for f in files:
-            if f.endswith(ext):
-                paths.append(f"{curdir}/{f}")
-    return paths
-
-
 @dataclasses.dataclass
 class Config:
     data_root: str
@@ -761,7 +753,7 @@ def main(cfg: Config):
     paths_to_process = []
     for dset in dsets:
         paths_to_process.extend(
-            find_ext_recursive(f"{cfg.data_root}/{dset}", ext=".npz")
+            map(str, Path(f"{cfg.data_root}/{dset}").glob("**/*_poses.npz"))
         )
 
     dev_ids = cfg.devices
