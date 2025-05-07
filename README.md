@@ -19,6 +19,7 @@ Code release for our preprint:
 
 - **Oct 7, 2024:** Initial release. (training code, core implementation details)
 - **Oct 14, 2024:** Added model checkpoint, dataset preprocessing, inference, and visualization scripts.
+- **May 6, 2025:** Updated scripts + instructions for dataset preprocessing, which is now self-contained in this repository.
 
 ## Overview
 
