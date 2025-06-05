@@ -15,23 +15,23 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 dependencies = [
-    "torch>2.2",
+    "torch==2.7.1",
     "viser>=0.2.11",
-    "typeguard",
-    "jaxtyping>=0.2.29",
-    "einops",
-    "rotary-embedding-torch",
-    "h5py",
-    "tensorboard",
-    "projectaria_tools",
-    "accelerate",
-    "tensorboardX",
-    "loguru",
-    "projectaria-tools[all]",
-    "opencv-python",
-    "gdown",
-    "scikit-learn", # Only needed for preprocessing
-    "smplx", # Only needed for preprocessing
+    "typeguard==4.4.3",
+    "jaxtyping==0.3.2",
+    "einops==0.8.1",
+    "rotary-embedding-torch==0.8.6",
+    "h5py==3.13.0",
+    "tensorboard==2.19.0",
+    "projectaria_tools==1.6.0",
+    "accelerate==1.7.0",
+    "tensorboardX==2.6.2.2",
+    "loguru==0.7.3",
+    "projectaria-tools[all]==1.6.0",
+    "opencv-python==4.11.0.86",
+    "gdown==5.2.0",
+    "scikit-learn==1.6.1", # Only needed for preprocessing
+    "smplx==0.1.28", # Only needed for preprocessing
 ]
 
 [tool.setuptools.package-data]

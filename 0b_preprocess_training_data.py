@@ -76,7 +76,7 @@ def main(
 
             print(
                 f"Finished ~{total_count - task_queue.qsize()}/{total_count},",
-                f"{(total_count - task_queue.qsize())/total_count * 100:.2f}% in",
+                f"{(total_count - task_queue.qsize()) / total_count * 100:.2f}% in",
                 f"{time.time() - start_time} seconds",
             )
 

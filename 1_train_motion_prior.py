@@ -200,7 +200,7 @@ def run_training(
                 mem_free, mem_total = torch.cuda.mem_get_info()
                 logger.info(
                     f"step: {step} ({loop_metrics.iterations_per_sec:.2f} it/sec)"
-                    f" mem: {(mem_total-mem_free)/1024**3:.2f}/{mem_total/1024**3:.2f}G"
+                    f" mem: {(mem_total - mem_free) / 1024**3:.2f}/{mem_total / 1024**3:.2f}G"
                     f" lr: {scheduler.get_last_lr()[0]:.7f}"
                     f" loss: {loss.item():.6f}"
                 )

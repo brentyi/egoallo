@@ -190,7 +190,7 @@ class JaxGuidanceParams:
 
     # Optimization parameters.
     lambda_initial: float = 0.1
-    max_iters: int = 20
+    max_iters: jdc.Static[int] = 20
 
     @staticmethod
     def defaults(

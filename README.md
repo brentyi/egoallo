@@ -96,7 +96,7 @@ EgoAllo requires Python 3.12 or newer.
 
    ```bash
    # Also see: https://jax.readthedocs.io/en/latest/installation.html
-   pip install -U "jax[cuda12]"
+   pip install "jax[cuda12]==0.6.1"
    ```
 
    You'll also need [jaxls](https://github.com/brentyi/jaxls):

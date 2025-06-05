@@ -127,9 +127,9 @@ def load_and_visualize(
         "frame_nums",
         "timestamps_ns",
     ]
-    assert all(
-        key in outputs for key in expected_keys
-    ), f"Missing keys in NPZ file. Expected: {expected_keys}, Found: {list(outputs.keys())}"
+    assert all(key in outputs for key in expected_keys), (
+        f"Missing keys in NPZ file. Expected: {expected_keys}, Found: {list(outputs.keys())}"
+    )
     (num_samples, timesteps, _, _) = outputs["body_quats"].shape
 
     # We assume the directory structure is:
