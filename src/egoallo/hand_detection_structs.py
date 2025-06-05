@@ -97,11 +97,11 @@ class CorrespondedAriaHandWristPoseDetections(TensorDataclass):
             ):
                 continue
 
-            if wp_pose.left_hand.confidence > 0.7:
+            if wp_pose.left_hand is not None and wp_pose.left_hand.confidence > 0.7:
                 indices_left.append(i)
                 detections_left.append(wp_pose.left_hand)
 
-            if wp_pose.right_hand.confidence > 0.7:
+            if wp_pose.right_hand is not None and wp_pose.right_hand.confidence > 0.7:
                 indices_right.append(i)
                 detections_right.append(wp_pose.right_hand)
 

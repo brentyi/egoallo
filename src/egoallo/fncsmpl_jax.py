@@ -215,7 +215,9 @@ class SmplhShapedAndPosed:
         assert (
             self.local_quats.shape[0]
             == self.shaped_model.body_model.parent_indices.shape[0]
-        ), "It looks like only a partial set of joint rotations was passed into `with_pose()`. We need all of them for LBS."
+        ), (
+            "It looks like only a partial set of joint rotations was passed into `with_pose()`. We need all of them for LBS."
+        )
 
         # Linear blend skinning with a pose blend shape.
         verts_with_blend = self.shaped_model.verts_zero + einsum(

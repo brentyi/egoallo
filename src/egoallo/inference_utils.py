@@ -80,9 +80,9 @@ class InferenceTrajectoryPaths:
         if len(wrist_and_palm_poses_csv) == 0:
             wrist_and_palm_poses_csv = None
         else:
-            assert (
-                len(wrist_and_palm_poses_csv) == 1
-            ), "Found multiple wrist and palm poses files!"
+            assert len(wrist_and_palm_poses_csv) == 1, (
+                "Found multiple wrist and palm poses files!"
+            )
 
         splat_path = traj_root / "splat.ply"
         if not splat_path.exists():
