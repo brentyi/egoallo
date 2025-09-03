@@ -17,6 +17,7 @@ classifiers = [
 dependencies = [
     "torch==2.7.1",
     "viser>=0.2.11",
+    "plyfile==1.1.2",
     "typeguard==4.4.3",
     "jaxtyping==0.3.2",
     "einops==0.8.1",
