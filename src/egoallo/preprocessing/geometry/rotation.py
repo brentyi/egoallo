@@ -49,7 +49,7 @@ def convert_rotation(rot, src_rep, tgt_rep):
         if tgt_rep == "aa":
             return cont_6d_to_axis_angle(rot)
         if tgt_rep == "quat":
-            return cont_6d_to_matrix(matrix_to_quaternion(rot))
+            return matrix_to_quaternion(cont_6d_to_matrix(rot))
         raise NotImplementedError
     raise NotImplementedError
 
