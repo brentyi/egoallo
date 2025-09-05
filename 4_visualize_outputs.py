@@ -31,6 +31,7 @@ from egoallo.vis_helpers import visualize_traj_and_hand_detections
 
 def main(
     search_root_dir: Path,
+    detector: str = "hamer",
     smplh_npz_path: Path = Path("./data/smplh/neutral/model.npz"),
 ) -> None:
     """Visualization script for outputs from EgoAllo.
@@ -48,9 +49,13 @@ def main(
     server.gui.configure_theme(dark_mode=True)
 
     def get_file_list():
+        if detector == "hamer":
+            egoallo_outputs_dir = search_root_dir.glob("**/egoallo_outputs/*.npz")
+        elif detector == "wilor":
+            egoallo_outputs_dir = search_root_dir.glob("**/wilor_egoallo_outputs/*.npz")
         return ["None"] + sorted(
             str(p.relative_to(search_root_dir))
-            for p in search_root_dir.glob("**/egoallo_outputs/*.npz")
+            for p in egoallo_outputs_dir
         )
 
     options = get_file_list()
@@ -86,6 +91,7 @@ def main(
                     loop_cb = load_and_visualize(
                         server,
                         npz_path,
+                        detector,
                         body_model,
                         device=device,
                     )
@@ -100,6 +106,7 @@ def main(
 def load_and_visualize(
     server: viser.ViserServer,
     npz_path: Path,
+    detector: str,
     body_model: fncsmpl.SmplhModel,
     device: torch.device,
 ) -> Callable[[], int]:
@@ -137,7 +144,7 @@ def load_and_visualize(
     #     - outputs
     #         -  the npz file
     traj_dir = npz_path.resolve().parent.parent
-    paths = InferenceTrajectoryPaths.find(traj_dir)
+    paths = InferenceTrajectoryPaths.find(traj_dir,detector=detector)
 
     provider = create_vrs_data_provider(str(paths.vrs_file))
     device_calib = provider.get_device_calibration()
